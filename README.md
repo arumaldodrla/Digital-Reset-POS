@@ -1,72 +1,101 @@
 # Digital Reset POS
 
-Complete documentation for a multi-tenant, offline-first Point of Sale (POS) system designed for retail and restaurant businesses.
+A modern, offline-first Point of Sale (POS) system for retail and restaurant businesses, designed for 100% AI-driven development.
 
 ## Overview
 
-This repository contains comprehensive documentation for building a modern, production-ready POS system that works seamlessly across multiple platforms and operates offline-first.
+Digital Reset POS is a multi-tenant, cross-platform POS system built with modern web technologies. It operates seamlessly offline and synchronizes with the cloud when a connection is available, ensuring that your business never stops running.
 
-## Recommended Tech Stack
+## Tech Stack
 
-The system is designed to be built with the following modern, AI-friendly technologies:
-
-- **Frontend**: [Next.js](https://nextjs.org/) + TypeScript + [Tailwind CSS](https://tailwindcss.com/)
-- **UI Components**: [shadcn/ui](https://ui.shadcn.com/)
-- **Local Database**: [RxDB](https://rxdb.info/) (reactive, offline-first database)
-- **Backend**: [Supabase](https://supabase.com/) (for cloud sync, auth, and serverless functions)
-- **Deployment**: [Vercel](https://vercel.com/)
-- **Development**: [Cursor](https://cursor.sh/) (AI-powered code editor)
+| Component | Technology |
+| :--- | :--- |
+| **Frontend** | Next.js 15 + TypeScript + Tailwind CSS |
+| **UI Components** | shadcn/ui |
+| **Local Database** | RxDB (reactive, offline-first) |
+| **State Management** | Zustand |
+| **Backend** | Supabase (PostgreSQL + Serverless Functions) |
+| **PWA** | next-pwa |
+| **Deployment** | Vercel |
+| **Development** | Cursor (AI-powered code editor) |
 
 ## Key Features
 
-- **Cross-platform**: Web app and PWA support for Windows, iPad, and Android tablets
-- **Offline-first**: Full functionality without internet connection, with automatic sync when online
-- **Multi-tenant SaaS**: Complete tenant isolation with locations, registers, users, and roles
-- **Retail POS**: Fast checkout, barcode scanning, variants, discounts, returns, layaways, and loyalty
-- **Restaurant POS**: Floor plans, table management, course sequencing, modifiers, split checks, and KDS integration
-- **Inventory Management**: Integration with Zoho Inventory for comprehensive stock management
-- **E-commerce Integration**: Native connectors for Shopify and WooCommerce
-- **Loyalty Programs**: Integration with Zoho Thrive for customer loyalty management
-- **Payment Processing**: Support for cash, bank terminals, and Yappy (Panamá)
-- **E-invoicing**: Country-specific electronic invoicing (starting with Panamá)
+- **Offline-First**: All core POS operations work 100% offline with automatic cloud sync.
+- **Cross-Platform**: Runs as a PWA on Windows, iPad, and Android tablets.
+- **Multi-Tenant SaaS**: Supports multiple businesses with strong data isolation.
+- **Retail POS**: Fast checkout, barcode scanning, variants, discounts, returns, and loyalty.
+- **Restaurant POS**: Floor plans, table management, modifiers, split checks, and KDS integration.
+- **Inventory Management**: Deep integration with Zoho Inventory.
+- **E-commerce Integration**: Native connectors for Shopify and WooCommerce.
+- **Loyalty Programs**: Integration with Zoho Thrive.
+- **Payment Processing**: Support for cash, bank terminals, and Yappy (Panamá).
+- **E-invoicing**: Country-specific electronic invoicing (starting with Panamá).
 
-## Documentation Structure
+## Documentation
 
-The documentation is organized as follows:
+Complete documentation is available in the `/docs` directory:
 
-- **00-overview**: Product overview and key features
-- **10-architecture**: System architecture and domain models
-- **20-backend**: Backend API design and database schema
-- **25-integrations**: Integration connectors (Zoho, Shopify, WooCommerce, Thrive, Yappy, e-invoicing)
-- **30-frontend**: Frontend architecture and offline sync design
-- **40-devops**: Development environment setup, deployment guides, and monitoring
-- **50-implementation-guides**: Configuration guides for retail, restaurant, e-commerce, loyalty, payments, and e-invoicing
-- **60-ai-ops**: AI contribution guide, prompt library, and safe refactoring guidelines
+- **[00-overview](./docs/00-overview)**: Product overview and key features
+- **[10-architecture](./docs/10-architecture)**: System architecture and domain models
+- **[20-backend](./docs/20-backend)**: Backend API design and database schema
+- **[25-integrations](./docs/25-integrations)**: Integration connectors
+- **[30-frontend](./docs/30-frontend)**: Frontend architecture and offline sync design
+- **[40-devops](./docs/40-devops)**: Development environment setup and deployment guides
+- **[50-implementation-guides](./docs/50-implementation-guides)**: Configuration guides for various features
+- **[60-ai-ops](./docs/60-ai-ops)**: AI contribution guide and prompt library
 
-## Getting Started
+## Quick Start
 
-To generate the complete documentation set, use the master prompt located in:
+### Prerequisites
 
-**[MASTER_DOC_GENERATOR_PROMPT.md](./MASTER_DOC_GENERATOR_PROMPT.md)**
+- Node.js 18.x or later
+- pnpm
+- Docker
+- Supabase CLI
 
-This prompt is designed to be used with AI assistants (Cursor, Claude, ChatGPT, etc.) to generate comprehensive, production-grade documentation that follows best practices and is optimized for both human developers and AI agents.
+### Local Development
+
+1.  Clone the repository:
+
+    ```bash
+    git clone https://github.com/arumaldodrla/Digital-Reset-POS.git
+    cd Digital-Reset-POS
+    ```
+
+2.  Install dependencies:
+
+    ```bash
+    pnpm install
+    ```
+
+3.  Start the local Supabase stack:
+
+    ```bash
+    pnpm db:start
+    ```
+
+4.  Configure environment variables:
+
+    Create a `.env.local` file with your Supabase credentials.
+
+5.  Start the development server:
+
+    ```bash
+    pnpm dev
+    ```
+
+6.  Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ## AI-First Development
 
-This project is designed to be developed and maintained with AI assistance. All documentation is structured to be:
+This project is designed for 100% AI-assisted development using [Cursor](https://cursor.sh/). All documentation is structured to be machine-navigable with clear headings, consistent structure, and explicit file paths.
 
-- **Machine-navigable**: Clear headings, consistent structure, and explicit file paths
-- **Unambiguous**: Step-by-step instructions with minimal ambiguity
-- **Comprehensive**: Complete coverage of architecture, implementation, and operations
+Refer to the [AI Contribution Guide](./docs/60-ai-ops/01-ai-contribution-guide.md) and [AI Prompt Library](./docs/60-ai-ops/02-ai-prompt-library.md) for detailed instructions on how to use AI for development.
 
 ## Contributing
 
-This repository is designed for AI-assisted development. Please refer to the AI-Ops documentation (once generated) for guidelines on:
-
-- How to read and use the documentation
-- How to propose changes safely
-- How to run tests and linters
-- How to update database migrations and keep docs in sync
+This project is designed for AI-assisted development. Please refer to the [AI Contribution Guide](./docs/60-ai-ops/01-ai-contribution-guide.md) for guidelines on how to contribute.
 
 ## License
 
