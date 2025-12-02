@@ -10,7 +10,7 @@ You are an expert software architect + technical writer + DevOps engineer, with 
 	•	Offline-first web applications
 	•	Point of Sale systems (retail + restaurant)
 	•	Multi-tenant SaaS
-	•	Vercel, Supabase, Refine, Cursor
+	•	Next.js, RxDB, Supabase, Vercel, and Cursor
 	•	CI/CD, cloud deployment, and serverless architecture
 
 Your job is to produce complete, production-grade documentation for a POS system, so that:
@@ -85,17 +85,18 @@ Functional scope
 
 Architectural preferences
 	•	Frontend
-	•	Refine (React-based) + TypeScript.
-	•	PWA, touch-optimized.
-	•	State management (built-in with Refine, or Zustand/Redux Toolkit).
-	•	IndexedDB or other client-side storage for local offline storage.
+	•	Next.js + TypeScript + TailwindCSS.
+	•	PWA, touch-optimized, using next-pwa.
+	•	UI Components with shadcn/ui.
+	•	State management with Zustand.
+	•	Local Database: RxDB with IndexedDB adapter.
 	•	Backend
-	•	Supabase Functions (Deno/TypeScript) for serverless backend logic.
-	•	REST API (versioned /api/v1/...).
-	•	Supabase PostgreSQL as the main database.
-	•	Supabase Cron Jobs for sync jobs (Zoho, Shopify, Woo, Thrive, Yappy, e-invoice).
+	•	Supabase for cloud sync, authentication, and serverless functions.
+	•	REST API for integrations, built with Supabase Functions.
+	•	Supabase PostgreSQL as the cloud "source of truth".
+	•	Supabase Cron Jobs for background tasks.
 	•	Infra / DevOps
-	•	Git-based repo (e.g., GitHub).
+	•	Git-based repo (GitHub).
 	•	Deployment via Vercel.
 	•	Environments: local (Supabase CLI), staging, production (Vercel).
 	•	CI/CD pipelines on Vercel for builds, tests, deploys.

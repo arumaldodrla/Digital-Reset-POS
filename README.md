@@ -6,13 +6,15 @@ Complete documentation for a multi-tenant, offline-first Point of Sale (POS) sys
 
 This repository contains comprehensive documentation for building a modern, production-ready POS system that works seamlessly across multiple platforms and operates offline-first.
 
-## Tech Stack
+## Recommended Tech Stack
 
-The system is built using the following modern technologies:
+The system is designed to be built with the following modern, AI-friendly technologies:
 
-- **Frontend**: [Refine](https://refine.dev/) (React-based framework) + TypeScript
-- **Backend**: [Supabase](https://supabase.com/) (PostgreSQL database + serverless functions)
-- **Deployment**: [Vercel](https://vercel.com/) (hosting and CI/CD)
+- **Frontend**: [Next.js](https://nextjs.org/) + TypeScript + [Tailwind CSS](https://tailwindcss.com/)
+- **UI Components**: [shadcn/ui](https://ui.shadcn.com/)
+- **Local Database**: [RxDB](https://rxdb.info/) (reactive, offline-first database)
+- **Backend**: [Supabase](https://supabase.com/) (for cloud sync, auth, and serverless functions)
+- **Deployment**: [Vercel](https://vercel.com/)
 - **Development**: [Cursor](https://cursor.sh/) (AI-powered code editor)
 
 ## Key Features
