@@ -1,10 +1,13 @@
 # Digital Reset POS
 
-**The Unfailing POS: An Offline-First Point of Sale System**
+**The Unfailing, Autonomous, and Global POS**
 
-Digital Reset POS is a modern, multi-tenant, cross-platform Point of Sale (POS) system designed for retail and restaurant businesses. Its core innovation is a **local-first architecture** that guarantees 100% functionality, even without an internet connection.
+Digital Reset POS is a modern, multi-tenant, cross-platform Point of Sale (POS) system designed for retail and restaurant businesses. It is defined by four core pillars:
 
-This project is designed for **100% AI-driven development**, with comprehensive documentation that enables AI agents to autonomously build, test, deploy, and maintain the system.
+1.  **Unyielding Reliability**: A local-first architecture guarantees 100% functionality, even without an internet connection.
+2.  **Effortless Usability**: A simple, zero-training interface for cashiers, with deep, complex features for managers.
+3.  **Global Reach**: Built with AI-powered internationalization (i18n), starting with English and Spanish.
+4.  **Autonomous Operation**: **100% developed and maintained by AI**, with weekly self-revision and updates.
 
 ---
 
@@ -24,6 +27,7 @@ Our stack was chosen for its reliability, developer experience, and suitability 
 | :--- | :--- | :--- |
 | **Frontend** | Next.js 15 + TypeScript | React framework with PWA support for cross-platform deployment. |
 | **UI Components** | shadcn/ui + Tailwind CSS | Customizable, accessible, and touch-friendly components. |
+| **Internationalization** | `next-intl` | AI-friendly framework for managing translations. |
 | **Local Database** | **RxDB** + IndexedDB | **The core of our offline-first strategy.** A full-featured, reactive database running in the browser. |
 | **State Management** | Zustand | Lightweight state management for UI-only state. |
 | **Backend** | **Supabase** (PostgreSQL) | Cloud sync, authentication, and serverless functions. **Never blocks POS operations.** |
@@ -51,6 +55,12 @@ All documentation is located in the `/docs` directory. It is organized to serve 
 | [System Architecture](./docs/10-architecture/01-system-architecture.md) | High-level system diagram, the three layers, and data flow. |
 | [Domain Model & ERD](./docs/10-architecture/02-domain-model-and-erd.md) | Plain-English data dictionary and entity-relationship diagram. |
 
+### Internationalization (i18n)
+
+| Document | Description |
+| :--- | :--- |
+| [i18n Architecture](./docs/15-internationalization/01-i18n-architecture.md) | The architecture for AI-powered translation and multi-language support. |
+
 ### Backend & Database
 
 | Document | Description |
@@ -58,13 +68,6 @@ All documentation is located in the `/docs` directory. It is organized to serve 
 | [Backend Overview](./docs/20-backend/01-backend-overview.md) | The role of Supabase as a supporting actor, not the main system. |
 | [API Design & Endpoints](./docs/20-backend/02-api-design-and-endpoints.md) | API strategy and endpoint specifications. |
 | [Database Schema Reference](./docs/20-backend/03-database-schema-reference.md) | The definitive technical blueprint for all database tables, types, and RLS policies. |
-
-### Frontend & Offline Sync
-
-| Document | Description |
-| :--- | :--- |
-| [Frontend Overview](./docs/30-frontend/01-frontend-overview.md) | Frontend architecture, technology choices, and user experience. |
-| [Offline & Sync Design](./docs/30-frontend/02-offline-and-sync-design.md) | Deep dive into RxDB, service workers, and conflict resolution. |
 
 ### Integrations
 
@@ -76,6 +79,13 @@ All documentation is located in the `/docs` directory. It is organized to serve 
 | [Zoho Thrive Connector](./docs/25-integrations/04-zoho-thrive-connector.md) | Design for the loyalty program integration. |
 | [Yappy Payment Connector](./docs/25-integrations/05-yappy-payment-connector.md) | Design for the Panamanian payment gateway. |
 | [E-invoicing Connectors](./docs/25-integrations/06-einvoicing-connectors.md) | Design for country-specific electronic invoicing. |
+
+### Frontend & Offline Sync
+
+| Document | Description |
+| :--- | :--- |
+| [Frontend Overview](./docs/30-frontend/01-frontend-overview.md) | Frontend architecture, technology choices, UX principles, and i18n integration. |
+| [Offline & Sync Design](./docs/30-frontend/02-offline-and-sync-design.md) | Deep dive into RxDB, service workers, and conflict resolution. |
 
 ### DevOps & Deployment
 
@@ -104,9 +114,15 @@ All documentation is located in the `/docs` directory. It is organized to serve 
 
 | Document | Description |
 | :--- | :--- |
-| [AI Contribution Guide](./docs/60-ai-ops/01-ai-contribution-guide.md) | **Mission briefing for AI agents.** The standard operating procedure for contributing code. |
+| [AI Contribution Guide](./docs/60-ai-ops/01-ai-contribution-guide.md) | **Mission briefing for AI agents.** The standard operating procedure for developing 100% of the application. |
 | [AI Prompt Library](./docs/60-ai-ops/02-ai-prompt-library.md) | Reusable prompt templates for common development tasks. |
 | [Safe Refactor & Extension Guide](./docs/60-ai-ops/03-safe-refactor-and-extension-guide.md) | Best practices for modifying existing code. |
+
+### Autonomous Operations
+
+| Document | Description |
+| :--- | :--- |
+| [Self-Maintenance & Updates](./docs/65-autonomous-operations/01-self-maintenance-and-updates.md) | The architecture for weekly self-revision and autonomous updates. |
 
 ### Marketing (For Marketing Teams)
 
@@ -152,7 +168,7 @@ pnpm dev
 
 ## Contributing
 
-This project is designed for AI-assisted development. Please refer to the [AI Contribution Guide](./docs/60-ai-ops/01-ai-contribution-guide.md) for the standard operating procedure.
+This project is **100% developed by AI**. Please refer to the [AI Contribution Guide](./docs/60-ai-ops/01-ai-contribution-guide.md) for the standard operating procedure. Human supervisors are responsible for creating issues, reviewing pull requests, and approving major updates.
 
 ---
 
@@ -162,4 +178,4 @@ This project is designed for AI-assisted development. Please refer to the [AI Co
 
 ---
 
-**Built for reliability. Designed for AI. Ready for the future of retail.**
+**Built for reliability. Designed for AI. Ready for the world.**

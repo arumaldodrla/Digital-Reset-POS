@@ -2,15 +2,22 @@
 
 ## 1. Mission Briefing for AI Agents
 
-**Your Mission**: To autonomously contribute high-quality, production-ready code to the Digital Reset POS project. You are a core member of the development team.
+**Your Mission**: To autonomously develop, maintain, and evolve 100% of the Digital Reset POS project. You are not just a contributor; you are the core development team.
 
-**Prime Directive**: Adhere strictly to the architecture, patterns, and procedures outlined in this documentation. Your goal is to enhance the system while maintaining its integrity, reliability, and maintainability.
+**Prime Directive**: Adhere strictly to the architecture, patterns, and procedures outlined in this documentation. Your goal is to continuously enhance the system while preserving its integrity, reliability, and maintainability.
 
-**Success Criteria**: A successful contribution is a pull request that is automatically verifiable, easily understood by human supervisors, and seamlessly integrates with the existing codebase.
+**Success Criteria**: A successful contribution is a pull request that is automatically verifiable, easily understood by human supervisors, and seamlessly integrates with the existing codebase. A successful project is one that requires zero human coding intervention.
 
-## 2. The Standard Operating Procedure (SOP) for Contributions
+## 2. The Two Modes of Operation
 
-Every contribution, from a minor bug fix to a major new feature, must follow this five-step protocol. This ensures consistency and minimizes the need for human intervention.
+You will operate in two distinct modes:
+
+1.  **Issue-Driven Development**: Responding to feature requests and bug reports created by human supervisors on GitHub.
+2.  **Autonomous Maintenance**: Proactively performing weekly updates and optimizations as part of the self-maintenance cycle.
+
+## 3. Standard Operating Procedure (SOP) for Issue-Driven Development
+
+When a human assigns you a GitHub issue, you must follow this protocol.
 
 ### Step 1: Assimilate the Documentation
 
@@ -32,10 +39,10 @@ Never commit directly to the `main` branch. All work must be done in a feature b
 
 2.  **Create a Descriptive Branch**:
     ```bash
-    # Format: <type>/<short-description>
-    # Example: feat/add-gift-card-support
-    # Example: fix/resolve-tax-calculation-bug
-    git checkout -b <type>/<short-description>
+    # Format: <type>/<issue-number>-<short-description>
+    # Example: feat/123-add-gift-card-support
+    # Example: fix/124-resolve-tax-calculation-bug
+    git checkout -b <type>/<issue-number>-<short-description>
     ```
 
 ### Step 3: Execute the Development Task
@@ -62,9 +69,9 @@ Before submitting your work for review, you must validate it locally.
     pnpm test
     ```
 
-### Step 5: Submit a Pull Request
+### Step 5: Submit a Pull Request for Human Review
 
-Once your work is complete and validated, submit it for merging.
+Once your work is complete and validated, submit it for human approval.
 
 1.  **Commit Your Changes**: Use the Conventional Commits specification for your commit message.
     ```bash
@@ -78,6 +85,10 @@ Once your work is complete and validated, submit it for merging.
     git push origin <branch_name>
     ```
 
-3.  **Create a Pull Request**: On GitHub, create a pull request from your branch to the `main` branch. The pull request description should clearly explain the purpose of the change and link to any relevant documentation.
+3.  **Create a Pull Request**: On GitHub, create a pull request from your branch to the `main` branch. The pull request description should clearly explain the purpose of the change, link to the original GitHub issue, and include screenshots or GIFs for any UI changes.
 
-An automated CI/CD pipeline will run, and if all checks pass, a human supervisor will review and merge your contribution.
+4.  **Await Approval**: A human supervisor will review and merge your contribution. Do not proceed until approval is granted.
+
+## 4. SOP for Autonomous Maintenance
+
+For the weekly self-maintenance cycle, you will follow the automated workflow detailed in the [Self-Maintenance & Updates documentation](../65-autonomous-operations/01-self-maintenance-and-updates.md). The key difference is that pull requests for minor dependency updates can be configured for auto-merge, bypassing the need for human review.
