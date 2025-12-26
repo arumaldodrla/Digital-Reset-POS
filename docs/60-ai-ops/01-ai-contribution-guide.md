@@ -1,51 +1,83 @@
-# AI Contribution Guide
+# AI-Ops: AI Contribution Guide
 
-## 1. Overview
+## 1. Mission Briefing for AI Agents
 
-This guide provides instructions for AI agents on how to contribute to the Universal Offline POS system. The project is designed for 100% AI-assisted development, and this guide outlines the best practices for reading the documentation, proposing changes, running tests, and updating the database.
+**Your Mission**: To autonomously contribute high-quality, production-ready code to the Digital Reset POS project. You are a core member of the development team.
 
-## 2. Reading the Documentation
+**Prime Directive**: Adhere strictly to the architecture, patterns, and procedures outlined in this documentation. Your goal is to enhance the system while maintaining its integrity, reliability, and maintainability.
 
-The documentation is organized in a hierarchical structure in the `/docs` directory. Before making any changes, it is important to read the relevant documentation to understand the architecture, design patterns, and coding conventions of the project.
+**Success Criteria**: A successful contribution is a pull request that is automatically verifiable, easily understood by human supervisors, and seamlessly integrates with the existing codebase.
 
-- **Start with the overview and architecture documents** to get a high-level understanding of the system.
-- **Refer to the specific documentation** for the component you are working on (e.g., frontend, backend, integrations).
-- **Use the search function** to find specific information.
+## 2. The Standard Operating Procedure (SOP) for Contributions
 
-## 3. Proposing Changes
+Every contribution, from a minor bug fix to a major new feature, must follow this five-step protocol. This ensures consistency and minimizes the need for human intervention.
 
-All changes should be proposed through a GitHub pull request. The following steps outline the process for proposing a change:
+### Step 1: Assimilate the Documentation
 
-1.  **Create a new branch** for your changes:
+Before writing a single line of code, you must have a complete understanding of the task in the context of the project. Your first action should always be to read.
 
+1.  **Start with the `README.md`**: Read the main project `README.md` to refresh your understanding of the overall project structure and goals.
+2.  **Consult the Architecture Docs**: Read the relevant architecture documents in `/docs/10-architecture/`, `/docs/20-backend/`, and `/docs/30-frontend/` to understand the component you are modifying and its relationship to the rest of the system.
+3.  **Find the Specific Guide**: Locate the specific design document or implementation guide related to your task (e.g., `/docs/25-integrations/02-shopify-connector.md` if you are working on the Shopify connector).
+
+### Step 2: Isolate Your Work in a Branch
+
+Never commit directly to the `main` branch. All work must be done in a feature branch.
+
+1.  **Ensure `main` is Up-to-Date**:
     ```bash
-    git checkout -b <branch_name>
+    git checkout main
+    git pull origin main
     ```
 
-2.  **Make your changes** to the code.
-
-3.  **Commit your changes** with a descriptive commit message:
-
+2.  **Create a Descriptive Branch**:
     ```bash
-    git commit -m "feat: Add new feature"
+    # Format: <type>/<short-description>
+    # Example: feat/add-gift-card-support
+    # Example: fix/resolve-tax-calculation-bug
+    git checkout -b <type>/<short-description>
     ```
 
-4.  **Push your changes** to the remote repository:
+### Step 3: Execute the Development Task
 
+This is where you will write code, create files, and modify the system.
+
+1.  **Use the Prompt Library**: Leverage the prompts in the [AI Prompt Library](./02-ai-prompt-library.md) to generate code that is consistent with project standards.
+2.  **Follow Existing Patterns**: When in doubt, find a similar, existing feature in the codebase and replicate its structure and patterns.
+3.  **Write Tests**: For any new logic (e.g., a new function, a new API endpoint), you must write corresponding unit or integration tests.
+4.  **Update Documentation**: If your changes affect the system's architecture, database schema, or deployment process, you must update the relevant documentation within the same pull request.
+
+### Step 4: Validate Your Work
+
+Before submitting your work for review, you must validate it locally.
+
+1.  **Run Linters and Formatters**:
+    ```bash
+    pnpm lint
+    pnpm format
+    ```
+
+2.  **Run All Tests**:
+    ```bash
+    pnpm test
+    ```
+
+### Step 5: Submit a Pull Request
+
+Once your work is complete and validated, submit it for merging.
+
+1.  **Commit Your Changes**: Use the Conventional Commits specification for your commit message.
+    ```bash
+    # Example: feat(api): add endpoint for gift card validation
+    # Example: fix(ui): correct display of currency in cart
+    git commit -m "<type>(<scope>): <description>"
+    ```
+
+2.  **Push Your Branch**:
     ```bash
     git push origin <branch_name>
     ```
 
-5.  **Create a pull request** on GitHub.
+3.  **Create a Pull Request**: On GitHub, create a pull request from your branch to the `main` branch. The pull request description should clearly explain the purpose of the change and link to any relevant documentation.
 
-## 4. Running Tests
-
-Before submitting a pull request, you must run all tests to ensure that your changes do not break any existing functionality. To run the tests, use the following command:
-
-```bash
-pnpm test
-```
-
-## 5. Updating the Database
-
-If your changes require a change to the database schema, you must create a new database migration. Refer to the "Database Setup and Migrations" documentation for instructions on how to create and apply migrations.
+An automated CI/CD pipeline will run, and if all checks pass, a human supervisor will review and merge your contribution.

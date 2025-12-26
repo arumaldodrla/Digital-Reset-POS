@@ -1,88 +1,80 @@
-# System Architecture
+# System Architecture: The Unfailing POS
 
-## 1. High-Level System Diagram
+## 1. Guiding Principle: Reliability Above All
 
-The Universal Offline POS system is designed with a modern, decoupled architecture that prioritizes offline-first functionality, scalability, and maintainability. The following diagram illustrates the high-level components and their interactions:
+The architecture of Digital Reset POS is founded on a single, non-negotiable principle: **a business must never lose a sale due to technology failure**. Every decision, from the choice of the database to the deployment strategy, is optimized to ensure the POS system is **always available, always responsive, and completely independent of internet connectivity**.
 
+This document outlines the technical blueprint that makes this possible, designed to be understood by business leaders, marketing teams, and the AI agents that will build and maintain the system.
+
+## 2. The Three Layers of the System
+
+Our architecture is composed of three distinct layers, each with a specific role. This separation of concerns ensures the system is robust, scalable, and easy to maintain.
+
+| Layer | Primary Role | Key Technologies | Analogy |
+| :--- | :--- | :--- | :--- |
+| **1. The Local-First Frontend** | **Run the Business** | Next.js, **RxDB** | The local store itself. It has everything it needs to operate independently. |
+| **2. The Cloud Backend** | **Sync & Backup** | **Supabase**, PostgreSQL | The central warehouse. It receives updates from stores and sends out new catalogs, but its unavailability doesn't stop a store from selling. |
+| **3. The Integration Fabric** | **Connect to the World** | Supabase Functions | The shipping and receiving department. It handles communication with external partners like suppliers (Zoho) and online stores (Shopify). |
+
+---
+
+## 3. The Local-First Frontend: Your Digital Cash Register
+
+The frontend is a Progressive Web App (PWA) that acts as the complete, self-contained POS terminal. It runs in a web browser on any device (iPad, PC, Android tablet) and is designed to be **100% functional offline**.
+
+### The Secret Sauce: RxDB - The Onboard Database
+
+The core of our offline-first strategy is **RxDB**, a powerful database that runs directly inside the web browser. Unlike competitors who merely cache a small amount of data, we run the entire operational database locally.
+
+- **It's a Full Database, Not a Cache**: Every product, customer, and transaction is stored locally. The app reads and writes from this local database, resulting in instantaneous, sub-50ms interactions.
+- **It's Always Available**: Because the database is on the device, it is completely immune to network failures.
+- **It's Reactive**: The UI is automatically updated in real-time as data changes in the local database, creating a fluid and responsive user experience.
+
+### High-Level Frontend Diagram
+
+```mermaid
+graph TD
+    subgraph "Frontend (PWA on Device)"
+        A[User Interface - Next.js] --> B{RxDB Local Database};
+        B --> A;
+        B -- background sync --> C(Sync Engine);
+    end
+
+    subgraph "Cloud (Internet Required)"
+        C -- HTTPS --> D[Supabase Backend];
+    end
+
+    style A fill:#cde4ff
+    style B fill:#ffc7c7
 ```
-┌─────────────────────────────────────┐
-│         Frontend (PWA)              │
-│  Next.js 15 + TypeScript + Tailwind │
-│                                     │
-│  ┌──────────────────────────────┐  │
-│  │   RxDB (Primary Database)    │  │
-│  │   - IndexedDB storage        │  │
-│  │   - Reactive queries         │  │
-│  │   - Conflict resolution      │  │
-│  │   - 100% offline capable     │  │
-│  └──────────────────────────────┘  │
-│              ↕ Sync                 │
-│  ┌──────────────────────────────┐  │
-│  │   Supabase Replication       │  │
-│  │   - Background sync          │  │
-│  │   - Conflict handling        │  │
-│  │   - Never blocks UI          │  │
-│  └──────────────────────────────┘  │
-└─────────────────────────────────────┘
-              ↕ (when online)
-┌─────────────────────────────────────┐
-│      Backend (Supabase Cloud)       │
-│  - PostgreSQL (source of truth)     │
-│  - Supabase Functions (integrations)│
-│  - Supabase Auth                    │
-│  - Supabase Storage                 │
-└─────────────────────────────────────┘
-```
 
-## 2. Logical Architecture
+## 4. The Cloud Backend: The Central Source of Truth
 
-The system is divided into three main logical layers:
+The backend, powered by **Supabase**, serves as the central hub for data synchronization, backup, and administration. **Crucially, the frontend does not depend on the backend to be online to process sales.**
 
-- **Frontend**: A Progressive Web App (PWA) built with Next.js, responsible for all user-facing interactions. It contains the local database (RxDB) and is designed to be fully functional offline.
-- **Backend**: A serverless backend powered by Supabase, responsible for cloud data storage, user authentication, and server-side business logic for integrations.
-- **Integrations**: A set of connectors that communicate with third-party services for inventory, e-commerce, loyalty, and payments.
+- **Data Storage (PostgreSQL)**: A robust PostgreSQL database acts as the ultimate source of truth for all data across all locations.
+- **Authentication (Supabase Auth)**: Manages secure user login and permissions.
+- **Background Sync**: The backend provides an API endpoint for the RxDB Sync Engine to push and pull changes. This process happens quietly in the background and never blocks the user.
+- **Serverless Functions**: These are used for tasks that require a secure, server-side environment, such as processing payments or communicating with third-party integration partners.
 
-## 3. Component Descriptions
+## 5. The Integration Fabric: Connecting to Other Systems
 
-### 3.1. Frontend Components
+No business is an island. Digital Reset POS is designed to connect seamlessly with the other tools businesses use.
 
-| Component | Technology | Description |
-| :--- | :--- | :--- |
-| **POS Application** | Next.js + RxDB | The primary user interface for sales, returns, and daily operations. It runs entirely in the browser and works 100% offline. |
-| **Admin/Backoffice** | Next.js | A web-based interface for managing products, customers, and system settings. It can be part of the same Next.js application or a separate one. |
-| **Kitchen Display System (KDS)** | Next.js | A dedicated interface for kitchen staff to view and manage orders. It subscribes to real-time updates from the POS. |
-| **Local Database** | RxDB | A reactive, offline-first database that runs in the browser. It stores all application data locally and handles data synchronization with the cloud. |
+- **Abstracted Connectors**: We use a provider model, where each integration type (e.g., `InventoryProvider`, `ECommerceProvider`) has a standard interface.
+- **Specific Implementations**: We then create concrete connectors (e.g., `ZohoInventoryConnector`, `ShopifyConnector`) that implement these interfaces. This makes it easy to add new integrations in the future.
+- **Server-Side Execution**: To protect sensitive API keys and manage complex logic, all third-party communication happens within secure Supabase Functions.
 
-### 3.2. Backend Components
+## 6. The Data Flow: How It All Works Together
 
-| Component | Technology | Description |
-| :--- | :--- | :--- |
-| **Cloud Database** | Supabase (PostgreSQL) | The central "source of truth" for all data. It stores data from all tenants and locations. |
-| **Authentication** | Supabase Auth | Manages user authentication and authorization, with support for email/password, social logins, and multi-factor authentication. |
-| **Serverless Functions** | Supabase Functions | Used to implement server-side business logic for integrations, webhooks, and other tasks that require a secure environment. |
-| **Background Workers** | Supabase Cron Jobs | Scheduled tasks for data synchronization, report generation, and other background processes. |
-| **Storage** | Supabase Storage | Used to store files, such as product images, invoices, and other documents. |
+1.  **A Cashier Makes a Sale (Offline)**: A cashier adds items to a cart and completes a sale. The transaction is written instantly to the local **RxDB database**. The UI updates, a receipt is printed. The entire process is completed in milliseconds, with zero reliance on the internet.
 
-### 3.3. Integration Components
+2.  **The Internet Returns**: The device reconnects to the internet. The **RxDB Sync Engine** wakes up in the background.
 
-| Component | Description |
-| :--- | :--- |
-| **Integration Providers** | A set of abstract interfaces that define the contract for each integration type (e.g., `InventoryProvider`, `PaymentProvider`). |
-| **Integration Connectors** | Concrete implementations of the provider interfaces that communicate with specific third-party services (e.g., `ZohoInventoryConnector`, `ShopifyConnector`). |
+3.  **Background Sync**: The Sync Engine sends the new sales data to the **Supabase Backend**. It also pulls down any changes from the cloud, such as a product price update made by a manager in the back office.
 
-## 4. Data Flow
+4.  **Conflict Resolution**: What if the price of a product was changed in the back office while the cashier was selling it offline? The system handles this gracefully. The sale is recorded with the price at the time of the transaction. The product's price is then updated on the POS for future sales. This "last-write-wins" approach can be customized for different scenarios.
 
-1. **Offline Operations**: All POS operations are first written to the local RxDB database. The UI is updated reactively, providing a fast and seamless user experience.
-2. **Background Sync**: When an internet connection is available, the RxDB replication engine automatically synchronizes local changes with the Supabase backend.
-3. **Conflict Resolution**: If there are conflicting changes from multiple devices, the replication engine resolves them based on a defined strategy (e.g., last-write-wins).
-4. **Cloud Processing**: Once data is in the Supabase backend, it can be processed by serverless functions, trigger webhooks, or be used for reporting and analytics.
-5. **Third-Party Integrations**: Serverless functions are used to communicate with third-party services, such as Zoho, Shopify, and payment gateways.
+5.  **Integration Trigger**: The new sale in the Supabase backend triggers a **Supabase Function**. This function securely communicates with Zoho Inventory to update stock levels and with Zoho Thrive to award loyalty points to the customer.
 
-## 5. Offline-First Architecture
-
-The offline-first architecture is the cornerstone of the Universal Offline POS system. It is achieved through the following key principles:
-
-- **Local-First Database**: RxDB is used as the primary database for the application. All data is stored locally in the browser's IndexedDB, making it accessible even without an internet connection.
-- **Reactive UI**: The UI is built with React and Zustand, which reactively update when data in the local database changes.
-- **Asynchronous Synchronization**: Data is synchronized with the Supabase backend asynchronously in the background. The UI is never blocked by network requests.
-- **Conflict Resolution**: The system is designed to handle data conflicts that may arise when multiple devices are used offline. RxDB provides a built-in conflict resolution mechanism that can be customized to fit the business logic.
+This architecture ensures that the system is not just resilient, but also intelligent and interconnected, providing a seamless experience for both the user and the business.

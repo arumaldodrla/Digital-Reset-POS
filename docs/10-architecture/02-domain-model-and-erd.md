@@ -1,210 +1,99 @@
-# Domain Model and ERD
+# Domain Model & Data Dictionary
 
-## 1. Core Entities
+## 1. Introduction
 
-The Universal Offline POS system is built around a set of core entities that represent the main concepts of the application. The following sections describe these entities and their relationships.
+This document defines the core data structures, or "entities," that model the business concepts of the Digital Reset POS system. Understanding these entities and their relationships is crucial for developers, database administrators, and anyone seeking to understand how the system organizes information.
 
-### 1.1. Tenants
+This serves as a plain-English data dictionary. For the technical SQL schema, please refer to the [Database Schema Reference](./../20-backend/03-database-schema-reference.md).
 
-A **Tenant** represents a single business or organization using the POS system. Each tenant has its own isolated data, including locations, users, products, and orders.
+## 2. The Core Business Structure
 
-| Column | Type | Description |
+These entities define the foundational structure of the businesses using our system.
+
+| Entity | Description | Key Attributes |
 | :--- | :--- | :--- |
-| `id` | `uuid` | Primary key. |
-| `name` | `text` | The name of the business. |
-| `created_at` | `timestamp` | The timestamp when the tenant was created. |
+| **Tenant** | Represents a single, distinct business or company. This is the top-level container for all other data, ensuring strict data isolation. | `id`, `name` |
+| **Location** | A physical storefront or branch belonging to a Tenant. A business can have multiple locations (e.g., "Downtown Cafe," "Mall Kiosk"). | `id`, `tenant_id`, `name`, `address` |
+| **Register** | A specific POS terminal or device within a Location. A location can have multiple registers (e.g., "Front Counter," "Drive-Thru Window"). | `id`, `location_id`, `name` |
 
-### 1.2. Locations
+---
 
-A **Location** represents a physical store or restaurant belonging to a tenant. Each tenant can have multiple locations.
+## 3. People & Permissions
 
-| Column | Type | Description |
+These entities manage who can access the system and what they are allowed to do.
+
+| Entity | Description | Key Attributes |
 | :--- | :--- | :--- |
-| `id` | `uuid` | Primary key. |
-| `tenant_id` | `uuid` | Foreign key to the `tenants` table. |
-| `name` | `text` | The name of the location (e.g., "Main Street Store"). |
-| `address` | `text` | The physical address of the location. |
-| `created_at` | `timestamp` | The timestamp when the location was created. |
+| **User** | An individual employee or staff member who can log in. Every user belongs to a single Tenant. | `id` (from Auth), `tenant_id`, `full_name`, `email` |
+| **Role** | A job function with a defined set of permissions (e.g., "Admin," "Cashier," "Manager"). | `id`, `name` |
+| **User Role** | The link between a User and a Role. A user can have multiple roles (e.g., someone can be both a "Cashier" and a "Shift Supervisor"). | `user_id`, `role_id` |
 
-### 1.3. Registers
+---
 
-A **Register** represents a single point of sale terminal at a location. Each location can have multiple registers.
+## 4. The Product Catalog
 
-| Column | Type | Description |
+These entities describe the products and services that a business sells.
+
+| Entity | Description | Key Attributes |
 | :--- | :--- | :--- |
-| `id` | `uuid` | Primary key. |
-| `location_id` | `uuid` | Foreign key to the `locations` table. |
-| `name` | `text` | The name of the register (e.g., "Front Counter"). |
-| `created_at` | `timestamp` | The timestamp when the register was created. |
+| **Item** | The core product or service (e.g., "Coffee," "T-Shirt"). It acts as a template for its variations. | `id`, `tenant_id`, `name`, `description`, `category` |
+| **Variant** | A specific version of an Item, with its own price and SKU (e.g., "Large Coffee," "Medium Blue T-Shirt"). This is what is actually sold. | `id`, `item_id`, `name`, `price`, `sku` |
+| **Modifier** | An option that customizes an Item at the time of sale (e.g., "Extra Shot of Espresso," "Gift Wrapping"). Can have an additional cost. | `id`, `tenant_id`, `name`, `price` |
 
-### 1.4. Users
+---
 
-A **User** represents an individual who can log in to the POS system. Each user is associated with a tenant and has one or more roles.
+## 5. Sales & Transactions
 
-| Column | Type | Description |
+These entities record the day-to-day sales activities.
+
+| Entity | Description | Key Attributes |
 | :--- | :--- | :--- |
-| `id` | `uuid` | Primary key (from Supabase Auth). |
-| `tenant_id` | `uuid` | Foreign key to the `tenants` table. |
-| `email` | `text` | The user's email address. |
-| `full_name` | `text` | The user's full name. |
-| `created_at` | `timestamp` | The timestamp when the user was created. |
+| **Order** | The record of a single customer transaction. It is the container for all items purchased at one time. | `id`, `register_id`, `total`, `status` (`pending`, `completed`, `refunded`) |
+| **Order Item** | A line item within an Order, linking a specific Variant to the Order. | `order_id`, `variant_id`, `quantity`, `price` (at time of sale) |
+| **Payment** | The record of how an Order was paid for. An order can have multiple payments (e.g., split between cash and credit card). | `id`, `order_id`, `amount`, `method` (`cash`, `credit_card`) |
+| **Invoice** | The official, legally compliant electronic invoice generated for an Order, particularly for e-invoicing regulations. | `id`, `order_id`, `fiscal_number`, `qr_code_url` |
 
-### 1.5. Roles
+---
 
-A **Role** defines a set of permissions for a user. Each user can have multiple roles.
+## 6. Entity-Relationship Diagram (ERD)
 
-| Column | Type | Description |
-| :--- | :--- | :--- |
-| `id` | `uuid` | Primary key. |
-| `name` | `text` | The name of the role (e.g., "Admin", "Cashier"). |
+This diagram illustrates how the core entities relate to one another.
 
-### 1.6. User Roles
+```mermaid
+erDiagram
+    TENANT ||--o{ LOCATION : "has"
+    TENANT ||--o{ USER : "has"
+    TENANT ||--o{ ITEM : "has"
 
-A **User Role** is a join table that associates users with roles.
+    LOCATION ||--o{ REGISTER : "has"
 
-| Column | Type | Description |
-| :--- | :--- | :--- |
-| `user_id` | `uuid` | Foreign key to the `users` table. |
-| `role_id` | `uuid` | Foreign key to the `roles` table. |
+    USER }|..|| ROLE : "has"
 
-## 2. Product Catalog Entities
+    ITEM ||--o{ VARIANT : "has"
 
-### 2.1. Items
+    REGISTER ||--o{ ORDER : "creates"
 
-An **Item** represents a product or service that can be sold.
+    ORDER ||--o{ ORDER_ITEM : "contains"
+    ORDER ||--o{ PAYMENT : "is paid by"
+    ORDER ||--o{ INVOICE : "generates"
 
-| Column | Type | Description |
-| :--- | :--- | :--- |
-| `id` | `uuid` | Primary key. |
-| `tenant_id` | `uuid` | Foreign key to the `tenants` table. |
-| `name` | `text` | The name of the item. |
-| `description` | `text` | A description of the item. |
-| `category` | `text` | The category of the item (e.g., "Drinks", "Appetizers"). |
+    VARIANT }|..|| ORDER_ITEM : "is sold as"
 
-### 2.2. Variants
+    %% Explanations
+    %% TENANT is the root
+    %% A TENANT has many LOCATIONS, USERS, and ITEMS
+    %% A LOCATION has many REGISTERS
+    %% A USER can have many ROLES (many-to-many)
+    %% An ITEM has many VARIANTS
+    %% A REGISTER creates many ORDERS
+    %% An ORDER contains many ORDER_ITEMS, is paid by many PAYMENTS, and generates one INVOICE
+    %% A VARIANT is sold as an ORDER_ITEM
+```
 
-A **Variant** represents a specific version of an item, such as a different size or color.
+### Key Relationships Explained:
 
-| Column | Type | Description |
-| :--- | :--- | :--- |
-| `id` | `uuid` | Primary key. |
-| `item_id` | `uuid` | Foreign key to the `items` table. |
-| `name` | `text` | The name of the variant (e.g., "Large", "Red"). |
-| `price` | `numeric` | The price of the variant. |
-| `sku` | `text` | The stock keeping unit (SKU) of the variant. |
-
-### 2.3. Menus
-
-A **Menu** is a collection of items that are available for sale at a specific location.
-
-| Column | Type | Description |
-| :--- | :--- | :--- |
-| `id` | `uuid` | Primary key. |
-| `location_id` | `uuid` | Foreign key to the `locations` table. |
-| `name` | `text` | The name of the menu (e.g., "Lunch Menu"). |
-
-### 2.4. Menu Items
-
-A **Menu Item** is a join table that associates items with menus.
-
-| Column | Type | Description |
-| :--- | :--- | :--- |
-| `menu_id` | `uuid` | Foreign key to the `menus` table. |
-| `item_id` | `uuid` | Foreign key to the `items` table. |
-
-### 2.5. Modifiers
-
-A **Modifier** is an option that can be added to an item, such as "extra cheese" or "no onions".
-
-| Column | Type | Description |
-| :--- | :--- | :--- |
-| `id` | `uuid` | Primary key. |
-| `tenant_id` | `uuid` | Foreign key to the `tenants` table. |
-| `name` | `text` | The name of the modifier. |
-| `price` | `numeric` | The additional price of the modifier. |
-
-## 3. Transactional Entities
-
-### 3.1. Orders
-
-An **Order** represents a single transaction, which can contain multiple items.
-
-| Column | Type | Description |
-| :--- | :--- | :--- |
-| `id` | `uuid` | Primary key. |
-| `register_id` | `uuid` | Foreign key to the `registers` table. |
-| `total` | `numeric` | The total amount of the order. |
-| `status` | `text` | The status of the order (e.g., "pending", "completed", "refunded"). |
-| `created_at` | `timestamp` | The timestamp when the order was created. |
-
-### 3.2. Order Items
-
-An **Order Item** is a join table that associates variants with orders.
-
-| Column | Type | Description |
-| :--- | :--- | :--- |
-| `order_id` | `uuid` | Foreign key to the `orders` table. |
-| `variant_id` | `uuid` | Foreign key to the `variants` table. |
-| `quantity` | `integer` | The quantity of the variant in the order. |
-| `price` | `numeric` | The price of the variant at the time of the order. |
-
-### 3.3. Payments
-
-A **Payment** represents a payment made for an order.
-
-| Column | Type | Description |
-| :--- | :--- | :--- |
-| `id` | `uuid` | Primary key. |
-| `order_id` | `uuid` | Foreign key to the `orders` table. |
-| `amount` | `numeric` | The amount of the payment. |
-| `method` | `text` | The payment method (e.g., "cash", "credit_card"). |
-| `created_at` | `timestamp` | The timestamp when the payment was made. |
-
-### 3.4. Invoices
-
-An **Invoice** represents an electronic invoice generated for an order.
-
-| Column | Type | Description |
-| :--- | :--- | :--- |
-| `id` | `uuid` | Primary key. |
-| `order_id` | `uuid` | Foreign key to the `orders` table. |
-| `fiscal_number` | `text` | The official fiscal number of the invoice. |
-| `qr_code_url` | `text` | A URL to the QR code for the invoice. |
-| `created_at` | `timestamp` | The timestamp when the invoice was created. |
-
-### 3.5. Loyalty Events
-
-A **Loyalty Event** represents a loyalty-related action, such as earning points or redeeming a reward.
-
-| Column | Type | Description |
-| :--- | :--- | :--- |
-| `id` | `uuid` | Primary key. |
-| `customer_id` | `uuid` | Foreign key to the `customers` table. |
-| `type` | `text` | The type of loyalty event (e.g., "earn_points", "redeem_reward"). |
-| `points` | `integer` | The number of points earned or redeemed. |
-| `created_at` | `timestamp` | The timestamp when the event occurred. |
-
-### 3.6. Stock Movements
-
-A **Stock Movement** represents a change in the stock level of a variant.
-
-| Column | Type | Description |
-| :--- | :--- | :--- |
-| `id` | `uuid` | Primary key. |
-| `variant_id` | `uuid` | Foreign key to the `variants` table. |
-| `quantity` | `integer` | The change in quantity (positive for additions, negative for subtractions). |
-| `reason` | `text` | The reason for the stock movement (e.g., "sale", "return", "adjustment"). |
-| `created_at` | `timestamp` | The timestamp when the stock movement occurred. |
-
-## 4. Entity-Relationship Diagram (Textual Description)
-
-- A **Tenant** has many **Locations**.
-- A **Location** has many **Registers** and many **Menus**.
-- A **Tenant** has many **Users**, **Items**, and **Modifiers**.
-- A **User** can have many **Roles** (many-to-many relationship through the `user_roles` table).
-- An **Item** has many **Variants**.
-- A **Menu** can have many **Items** (many-to-many relationship through the `menu_items` table).
-- An **Order** belongs to a **Register** and has many **Order Items**.
-- An **Order** can have many **Payments** and one **Invoice**.
-- A **Customer** can have many **Loyalty Events**.
-- A **Variant** can have many **Stock Movements**.
+-   A **Tenant** is the central entity. It owns **Locations**, **Users**, and the entire **Item** catalog.
+-   A **Location** is a physical place that contains one or more **Registers**.
+-   An **Order** is created at a specific **Register**. It is composed of one or more **Order Items**.
+-   Each **Order Item** refers to a specific **Variant** of an **Item**, capturing the price and quantity at the moment of sale.
+-   An **Order** can be settled by one or more **Payments**.

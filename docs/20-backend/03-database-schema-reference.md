@@ -1,145 +1,149 @@
 # Database Schema Reference
 
-## 1. Introduction
+## 1. Introduction for All Audiences
 
-This document provides a reference for the PostgreSQL database schema used in the Supabase backend. The schema is designed to be normalized and scalable, with a focus on multi-tenancy and data integrity.
+This document is the definitive technical blueprint for the Digital Reset POS database, which is built on PostgreSQL and managed by Supabase. It is designed to be a single source of truth for three key groups:
 
-## 2. Core Tables
+-   **For AI & Human Developers**: This is your primary reference for table structures, data types, constraints, and relationships. Use this to write accurate database queries, create migrations, and understand the data model.
 
-### `tenants`
+-   **For Project Managers**: This document provides insight into how business requirements are translated into data structures. It helps you understand the system's capabilities and the implications of new feature requests on the data model.
 
-Stores information about each business or organization using the system.
+-   **For Marketing Teams**: While technical, this document reveals the system's core logic. Understanding how we structure data for multi-tenancy, offline sync, and integrations can provide powerful insights for creating marketing messages about the platform's robustness and flexibility.
 
-| Column | Type | Constraints | Description |
-| :--- | :--- | :--- | :--- |
-| `id` | `uuid` | Primary Key, Default: `gen_random_uuid()` | Unique identifier for the tenant. |
-| `name` | `text` | Not Null | The name of the business. |
-| `created_at` | `timestamptz` | Not Null, Default: `now()` | Timestamp of creation. |
+## 2. Schema Design Principles
 
-### `locations`
+Our database is designed around several core principles to ensure it is secure, scalable, and maintainable.
 
-Stores information about each physical store or restaurant.
+-   **Multi-Tenancy by Design**: Every table containing business-specific data has a `tenant_id` column. This is the foundation of our ability to serve multiple businesses from a single database while guaranteeing their data is completely isolated.
 
-| Column | Type | Constraints | Description |
-| :--- | :--- | :--- | :--- |
-| `id` | `uuid` | Primary Key, Default: `gen_random_uuid()` | Unique identifier for the location. |
-| `tenant_id` | `uuid` | Not Null, Foreign Key to `tenants.id` | The tenant this location belongs to. |
-| `name` | `text` | Not Null | The name of the location. |
-| `address` | `text` | | The physical address of the location. |
-| `created_at` | `timestamptz` | Not Null, Default: `now()` | Timestamp of creation. |
+-   **Universally Unique IDs (UUIDs)**: We use `uuid` for all primary keys. This is critical for our offline-first architecture, as it allows new records (like an order or a customer) to be created on any offline device without the risk of ID conflicts when the data is later synced to the cloud.
 
-### `registers`
+-   **Clear Naming Conventions**: Tables are named as plural nouns (e.g., `orders`, `products`). Columns use `snake_case` (e.g., `created_at`). Foreign key columns are named `singular_table_name_id` (e.g., `tenant_id`, `order_id`).
 
-Stores information about each POS terminal.
+-   **Data Integrity**: We use foreign key constraints, `NOT NULL` constraints, and default values to ensure the data remains consistent and reliable.
 
-| Column | Type | Constraints | Description |
-| :--- | :--- | :--- | :--- |
-| `id` | `uuid` | Primary Key, Default: `gen_random_uuid()` | Unique identifier for the register. |
-| `location_id` | `uuid` | Not Null, Foreign Key to `locations.id` | The location this register belongs to. |
-| `name` | `text` | Not Null | The name of the register. |
-| `created_at` | `timestamptz` | Not Null, Default: `now()` | Timestamp of creation. |
+-   **Timestamps**: All tables include `created_at` and `updated_at` timestamps to provide a clear audit trail for when data is created and modified.
 
-### `users`
+---
 
-Mirrors the `auth.users` table from Supabase Auth and links users to tenants.
+## 3. Table Definitions
+
+### Core Business Structure
+
+These tables form the backbone of the multi-tenant system.
+
+#### `tenants`
+
+Stores information about each distinct business using the system.
 
 | Column | Type | Constraints | Description |
 | :--- | :--- | :--- | :--- |
-| `id` | `uuid` | Primary Key, Foreign Key to `auth.users.id` | Unique identifier for the user. |
-| `tenant_id` | `uuid` | Not Null, Foreign Key to `tenants.id` | The tenant this user belongs to. |
-| `full_name` | `text` | | The user's full name. |
+| `id` | `uuid` | Primary Key | The unique identifier for the entire business. |
+| `name` | `text` | Not Null | The legal or display name of the business. |
 
-### `roles` and `user_roles`
+#### `locations`
 
-Standard role-based access control (RBAC) tables.
-
-**`roles`**
+Stores information about each physical store or branch belonging to a tenant.
 
 | Column | Type | Constraints | Description |
 | :--- | :--- | :--- | :--- |
-| `id` | `uuid` | Primary Key, Default: `gen_random_uuid()` | Unique identifier for the role. |
-| `name` | `text` | Not Null, Unique | The name of the role (e.g., "Admin", "Cashier"). |
+| `id` | `uuid` | Primary Key | The unique identifier for the physical location. |
+| `tenant_id` | `uuid` | Foreign Key to `tenants.id` | Links this location to its parent business. |
+| `name` | `text` | Not Null | The name of the store (e.g., "Main Street Cafe"). |
 
-**`user_roles`**
+#### `registers`
 
-| Column | Type | Constraints | Description |
-| :--- | :--- | :--- | :--- |
-| `user_id` | `uuid` | Primary Key, Foreign Key to `users.id` | The user. |
-| `role_id` | `uuid` | Primary Key, Foreign Key to `roles.id` | The role assigned to the user. |
-
-## 3. Product Catalog Tables
-
-### `items`
-
-Stores information about products and services.
+Stores information about each POS terminal or device at a location.
 
 | Column | Type | Constraints | Description |
 | :--- | :--- | :--- | :--- |
-| `id` | `uuid` | Primary Key, Default: `gen_random_uuid()` | Unique identifier for the item. |
-| `tenant_id` | `uuid` | Not Null, Foreign Key to `tenants.id` | The tenant this item belongs to. |
-| `name` | `text` | Not Null | The name of the item. |
-| `description` | `text` | | A description of the item. |
-| `category` | `text` | | The category of the item. |
+| `id` | `uuid` | Primary Key | The unique identifier for the POS device. |
+| `location_id` | `uuid` | Foreign Key to `locations.id` | Links this register to its physical location. |
+| `name` | `text` | Not Null | The name of the register (e.g., "Front Counter"). |
 
-### `variants`
+### Product Catalog
 
-Stores information about specific versions of items.
+These tables define the products and services a business sells.
 
-| Column | Type | Constraints | Description |
-| :--- | :--- | :--- | :--- |
-| `id` | `uuid` | Primary Key, Default: `gen_random_uuid()` | Unique identifier for the variant. |
-| `item_id` | `uuid` | Not Null, Foreign Key to `items.id` | The item this variant belongs to. |
-| `name` | `text` | Not Null | The name of the variant (e.g., "Large", "Red"). |
-| `price` | `numeric` | Not Null, Default: 0 | The price of the variant. |
-| `sku` | `text` | | The stock keeping unit (SKU) of the variant. |
+#### `products`
 
-## 4. Transactional Tables
-
-### `orders`
-
-Stores information about each transaction.
+Stores the core information about a product, acting as a template for its variations.
 
 | Column | Type | Constraints | Description |
 | :--- | :--- | :--- | :--- |
-| `id` | `uuid` | Primary Key, Default: `gen_random_uuid()` | Unique identifier for the order. |
-| `register_id` | `uuid` | Not Null, Foreign Key to `registers.id` | The register where the order was created. |
-| `total` | `numeric` | Not Null, Default: 0 | The total amount of the order. |
-| `status` | `text` | Not Null, Default: `'pending'` | The status of the order. |
-| `created_at` | `timestamptz` | Not Null, Default: `now()` | Timestamp of creation. |
+| `id` | `uuid` | Primary Key | Unique identifier for the product. |
+| `tenant_id` | `uuid` | Foreign Key to `tenants.id` | Links this product to the business that owns it. |
+| `name` | `text` | Not Null | The name of the product (e.g., "T-Shirt"). |
+| `description` | `text` | | A detailed description for use in e-commerce or menus. |
 
-### `order_items`
+#### `variants`
 
-Associates variants with orders.
-
-| Column | Type | Constraints | Description |
-| :--- | :--- | :--- | :--- |
-| `id` | `uuid` | Primary Key, Default: `gen_random_uuid()` | Unique identifier for the order item. |
-| `order_id` | `uuid` | Not Null, Foreign Key to `orders.id` | The order this item belongs to. |
-| `variant_id` | `uuid` | Not Null, Foreign Key to `variants.id` | The variant being ordered. |
-| `quantity` | `integer` | Not Null, Default: 1 | The quantity of the variant. |
-| `price` | `numeric` | Not Null | The price of the variant at the time of the order. |
-
-### `payments`
-
-Stores information about payments for orders.
+Stores the specific, sellable versions of a product.
 
 | Column | Type | Constraints | Description |
 | :--- | :--- | :--- | :--- |
-| `id` | `uuid` | Primary Key, Default: `gen_random_uuid()` | Unique identifier for the payment. |
-| `order_id` | `uuid` | Not Null, Foreign Key to `orders.id` | The order this payment is for. |
-| `amount` | `numeric` | Not Null | The amount of the payment. |
-| `method` | `text` | Not Null | The payment method (e.g., "cash", "credit_card"). |
-| `created_at` | `timestamptz` | Not Null, Default: `now()` | Timestamp of creation. |
+| `id` | `uuid` | Primary Key | Unique identifier for the specific variant. |
+| `product_id` | `uuid` | Foreign Key to `products.id` | Links this variant to its parent product. |
+| `name` | `text` | Not Null | The name of the variant (e.g., "Large, Blue"). |
+| `price` | `numeric` | Not Null | The selling price of this specific variant. |
+| `sku` | `text` | Unique per tenant | The Stock Keeping Unit for inventory tracking. |
 
-## 5. Multi-Tenancy and RLS
+### Sales & Transactions
 
-- **Tenant Isolation**: All tables that contain tenant-specific data have a `tenant_id` column. This is the primary mechanism for isolating data between tenants.
-- **Row-Level Security (RLS)**: Supabase's RLS is enabled on all tenant-specific tables. RLS policies ensure that users can only access data that belongs to their own tenant. A typical RLS policy would look like this:
+These tables record the daily business of making sales.
+
+#### `orders`
+
+Stores the record of a single customer transaction.
+
+| Column | Type | Constraints | Description |
+| :--- | :--- | :--- | :--- |
+| `id` | `uuid` | Primary Key | The unique identifier for the transaction. |
+| `register_id` | `uuid` | Foreign Key to `registers.id` | The register where the sale was made. |
+| `total` | `numeric` | Not Null | The final total amount of the order, including taxes and discounts. |
+| `status` | `text` | Not Null | The current state of the order (e.g., `completed`, `refunded`). |
+
+#### `order_items`
+
+Represents a single line item within an order.
+
+| Column | Type | Constraints | Description |
+| :--- | :--- | :--- | :--- |
+| `id` | `uuid` | Primary Key | Unique identifier for the line item. |
+| `order_id` | `uuid` | Foreign Key to `orders.id` | Links this line item to its parent order. |
+| `variant_id` | `uuid` | Foreign Key to `variants.id` | The specific product variant that was sold. |
+| `quantity` | `integer` | Not Null | The number of units of this variant sold. |
+| `price` | `numeric` | Not Null | The price of the variant **at the time of the sale**, to preserve historical accuracy. |
+
+#### `payments`
+
+Stores information about how an order was paid.
+
+| Column | Type | Constraints | Description |
+| :--- | :--- | :--- | :--- |
+| `id` | `uuid` | Primary Key | Unique identifier for the payment. |
+| `order_id` | `uuid` | Foreign Key to `orders.id` | Links this payment to its parent order. |
+| `amount` | `numeric` | Not Null | The amount of the payment. An order can have multiple payments. |
+| `method` | `text` | Not Null | The payment method used (e.g., `cash`, `credit_card`). |
+
+---
+
+## 4. Security: Row-Level Security (RLS)
+
+**What it is, in simple terms**: Imagine the database is a giant filing cabinet with drawers for each business (tenant). Row-Level Security is like giving each employee a key that only opens the drawer belonging to their company. An employee from "Company A" can never, under any circumstances, open the drawer for "Company B".
+
+**How it works**: We enable RLS on every table that contains tenant-specific data. We then create a security policy that checks the `tenant_id` of the currently logged-in user against the `tenant_id` of the data they are trying to access. If they don't match, the database denies access. This is not an application-level check; it is enforced directly by the database, making it extremely secure.
+
+**Example RLS Policy**:
+
+This policy ensures a user can only see products that belong to their own company.
 
 ```sql
-CREATE POLICY "Enable access for users based on tenant_id" ON public.items
-FOR ALL
-USING (auth.uid() IN (SELECT user_id FROM user_roles WHERE tenant_id = public.items.tenant_id));
+-- This policy is attached to the 'products' table.
+CREATE POLICY "Users can only see products from their own tenant" 
+ON public.products
+FOR SELECT -- This policy applies when someone tries to READ data
+USING (get_my_tenant_id() = tenant_id); -- The function get_my_tenant_id() securely gets the tenant_id of the logged-in user.
 ```
 
-This policy ensures that a user can only access items that belong to the same tenant they are a member of.
+This RLS enforcement is the cornerstone of our multi-tenant security model, making it safe to store data from multiple businesses in the same database.
